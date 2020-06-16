@@ -11,7 +11,6 @@ import (
 func main() {
 	// s := 0b00000010
 	// fmt.Println(s)
-
 	reader := open("sample.webm")
 
 	parser := tools.Parser{}
@@ -19,12 +18,6 @@ func main() {
 	for el := range elPipe {
 		fmt.Printf("%s[%s][%s]=%d\n", el.Element.Name, el.Element.Hex, string(el.Element.Typ), len(el.Data))
 	}
-
-	// bytes, err := ioutil.ReadAll(reader)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// tools.ParseWhole(bytes)
 }
 
 func open(name string) io.Reader {
@@ -34,5 +27,4 @@ func open(name string) io.Reader {
 	}
 
 	return f
-
 }
