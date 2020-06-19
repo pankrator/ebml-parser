@@ -83,7 +83,6 @@ func Parse(r io.Reader) chan Result {
 						}
 						state = ID
 					case Master:
-
 						results <- Result{
 							Element: el,
 						}
@@ -201,11 +200,10 @@ func ReadVintS(r *bufio.Reader) (uint64, int, bool) {
 		panic(err)
 	}
 	length := LeadingZeros(firstByte[0])
-	if r.Buffered() < length {
-		return 0, 0, false
-	}
 	remaining, err := r.Peek(length)
-	if err != nil {
+	if err == io.EOF {
+		return 0, 0, false
+	} else if err != nil {
 		panic(err)
 	}
 	result := make([]byte, length)
