@@ -199,7 +199,7 @@ func ReadVint(b []byte, offset int64) (uint64, int) {
 
 func ReadVintS(r *bufio.Reader) (uint64, int, error) {
 	firstByte, err := r.Peek(1)
-	if err == nil {
+	if err != nil {
 		return 0, 0, err
 	}
 	length := LeadingZeros(firstByte[0])
