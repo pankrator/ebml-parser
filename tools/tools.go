@@ -22,10 +22,12 @@ var (
 )
 
 type Result struct {
-	Element ElementData
-	Data    []byte
+	Element  ElementData
+	DataSize int64
+	Data     []byte
 }
 
+// TODO: Accept channel to close/stop the parsing
 func Parse(r io.Reader) chan Result {
 	results := make(chan Result, queueSize)
 
@@ -35,9 +37,11 @@ func Parse(r io.Reader) chan Result {
 		var dataSize int64
 		var el ElementData
 		var found bool
+		var tag Result
 		for {
 			switch state {
 			case ID:
+				tag = Result{}
 				_, length, err := ReadVintS(bfr)
 				if err == io.EOF || err == io.ErrUnexpectedEOF {
 					// Not enough bytes to read the VInt
@@ -59,6 +63,7 @@ func Parse(r io.Reader) chan Result {
 
 				state = DATA_SIZE
 				el, found = Schema[idHex]
+				tag.Element = el
 
 			case DATA_SIZE:
 				size, length, err := ReadVintS(bfr)
@@ -70,7 +75,12 @@ func Parse(r io.Reader) chan Result {
 				}
 				bfr.Discard(length)
 				dataSize = int64(size)
+				tag.DataSize = dataSize
 				state = DATA
+				// if !found && dataSize != 0b0000000011111111111111111111111111111111111111111111111111111111 {
+				// 	state = ID
+				// 	bfr.Discard(int(dataSize))
+				// }
 
 			case DATA:
 				if found {
@@ -82,23 +92,16 @@ func Parse(r io.Reader) chan Result {
 							n, _ := bfr.Read(result[offset:])
 							offset += int64(n)
 						}
-						results <- Result{
-							Element: el,
-							Data:    result,
-						}
+
+						tag.Data = result
 						state = ID
 					case Master:
-						results <- Result{
-							Element: el,
-						}
+						tag.Element = el
 						state = ID
 					case UInteger:
 						bytes := make([]byte, dataSize)
 						bfr.Read(bytes)
-						results <- Result{
-							Element: el,
-							Data:    bytes,
-						}
+						tag.Data = bytes
 						state = ID
 					case Binary:
 						var read int = 0
@@ -114,12 +117,10 @@ func Parse(r io.Reader) chan Result {
 							panic(err)
 						}
 
-						results <- Result{
-							Element: el,
-							Data:    contentBytes,
-						}
+						tag.Data = contentBytes
 						state = ID
 					}
+					results <- tag
 				} else {
 					var read int64 = 0
 					for read < dataSize {
