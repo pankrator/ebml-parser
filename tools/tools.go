@@ -38,18 +38,21 @@ func Parse(r io.Reader) chan Result {
 		for {
 			switch state {
 			case ID:
-				_, length, ok := ReadVintS(bfr)
-				if !ok {
+				_, length, err := ReadVintS(bfr)
+				if err == io.EOF || err == io.ErrUnexpectedEOF {
 					// Not enough bytes to read the VInt
 					time.Sleep(waitTimeForData)
 					continue
+				} else if err != nil {
+					// TODO: Send the error on the channel
+					return
 				}
 				tagBytes, err := bfr.Peek(length)
 				if err == io.EOF || err == io.ErrUnexpectedEOF {
 					time.Sleep(waitTimeForData)
 					continue
 				} else if err != nil {
-					panic(err)
+					return
 				}
 				bfr.Discard(length)
 				idHex := ReadTagHex(tagBytes, 0, int64(length))
@@ -58,10 +61,12 @@ func Parse(r io.Reader) chan Result {
 				el, found = Schema[idHex]
 
 			case DATA_SIZE:
-				size, length, ok := ReadVintS(bfr)
-				if !ok {
+				size, length, err := ReadVintS(bfr)
+				if err == io.EOF || err == io.ErrUnexpectedEOF {
 					time.Sleep(waitTimeForData)
 					continue
+				} else if err != nil {
+					return
 				}
 				bfr.Discard(length)
 				dataSize = int64(size)
@@ -192,24 +197,20 @@ func ReadVint(b []byte, offset int64) (uint64, int) {
 	return ToUint64(remaining), length
 }
 
-func ReadVintS(r *bufio.Reader) (uint64, int, bool) {
+func ReadVintS(r *bufio.Reader) (uint64, int, error) {
 	firstByte, err := r.Peek(1)
-	if err == io.EOF {
-		return 0, 0, false
-	} else if err != nil {
-		panic(err)
+	if err == nil {
+		return 0, 0, err
 	}
 	length := LeadingZeros(firstByte[0])
 	remaining, err := r.Peek(length)
-	if err == io.EOF {
-		return 0, 0, false
-	} else if err != nil {
-		panic(err)
+	if err != nil {
+		return 0, 0, err
 	}
 	result := make([]byte, length)
 	copy(result, remaining)
 	result[0] = result[0] & ((1 << (8 - length)) - 1)
-	return ToUint64(result), length, true
+	return ToUint64(result), length, nil
 }
 
 func ReadTagHex(buffer []byte, start, end int64) string {
