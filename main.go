@@ -15,6 +15,10 @@ func main() {
 	// os.Exit(0)
 	// b, _ := hex.DecodeString(s)
 	// fmt.Println(binary.BigEndian.Uint64(b))
+	// b := encoder.WriteVInt(s)
+	// fmt.Println(tools.ReadVint(b, 0))
+	// os.Exit(0)
+
 	reader := open("sample.webm")
 
 	parser := tools.Parser{}

@@ -18,7 +18,8 @@ func Encode(el tools.ElementData) []byte {
 func WriteVInt(value uint64) []byte {
 	length := 1
 	for length = 1; length <= 8; length += 1 {
-		if value < 1<<(7*length)-1 {
+		var limit uint64 = 1<<(7*length) - 1
+		if value <= limit {
 			break
 		}
 	}
