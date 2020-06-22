@@ -30,6 +30,18 @@ var Schema = map[string]*ElementData{
 		Name: "EBMLMaxSizeLength",
 		Typ:  UInteger,
 	},
+	"42f7": &ElementData{
+		Name: "EBMLReadVersion",
+		Typ:  UInteger,
+	},
+	"4287": &ElementData{
+		Name: "DocTypeVersion",
+		Typ:  UInteger,
+	},
+	"4285": &ElementData{
+		Name: "DocTypeReadVersion",
+		Typ:  UInteger,
+	},
 	"4286": &ElementData{
 		Name: "EBMLVersion",
 		Typ:  UInteger,
