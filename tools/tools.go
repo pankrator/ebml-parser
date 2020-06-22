@@ -22,7 +22,7 @@ var (
 )
 
 type Result struct {
-	Element  ElementData
+	Element  *ElementData
 	DataSize int64
 	Data     []byte
 }
@@ -35,7 +35,7 @@ func Parse(r io.Reader) chan Result {
 		bfr := bufio.NewReader(r)
 		state := ID
 		var dataSize int64
-		var el ElementData
+		var el *ElementData
 		var found bool
 		var tag Result
 		for {
@@ -141,7 +141,7 @@ func ParseWhole(buffer []byte) {
 	var offset int64 = 0
 	state := ID
 	var dataSize int64
-	var el ElementData
+	var el *ElementData
 	var found bool
 	for {
 		switch state {
