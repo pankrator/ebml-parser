@@ -63,6 +63,9 @@ func Parse(r io.Reader) chan Result {
 
 				state = DATA_SIZE
 				el, found = Schema[idHex]
+				if !found {
+					fmt.Printf("Element %s not found\n", idHex)
+				}
 				tag.Element = el
 
 			case DATA_SIZE:

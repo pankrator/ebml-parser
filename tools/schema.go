@@ -22,6 +22,14 @@ var Schema = map[string]*ElementData{
 		Name: "EBML",
 		Typ:  Master,
 	},
+	"42f2": &ElementData{
+		Name: "EBMLMaxIDLength",
+		Typ:  UInteger,
+	},
+	"42f3": &ElementData{
+		Name: "EBMLMaxSizeLength",
+		Typ:  UInteger,
+	},
 	"4286": &ElementData{
 		Name: "EBMLVersion",
 		Typ:  UInteger,
@@ -71,6 +79,10 @@ var Schema = map[string]*ElementData{
 	"4d80": &ElementData{
 		Name: "MuxingApp",
 		Typ:  String,
+	},
+	"55ee": &ElementData{
+		Name: "MaxBlockAdditionID",
+		Typ:  UInteger,
 	},
 	"5741": &ElementData{
 		Name: "WritingApp",
