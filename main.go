@@ -18,7 +18,7 @@ func main() {
 	// b := encoder.WriteVInt(s)
 	// fmt.Println(tools.ReadVint(b, 0))
 	b := tools.UInt64ToByte(1000)
-	reverseArr(b)
+	// reverseArr(b)
 	fmt.Println(tools.ToUint64(b), len(b))
 	os.Exit(0)
 
@@ -32,12 +32,6 @@ func main() {
 			number := tools.ToUint64(el.Data)
 			fmt.Printf("%+v\n", number)
 		}
-	}
-}
-
-func reverseArr(arr []byte) {
-	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
-		arr[i], arr[j] = arr[j], arr[i]
 	}
 }
 

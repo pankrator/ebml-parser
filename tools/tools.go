@@ -266,5 +266,12 @@ func UInt64ToByte(n uint64) []byte {
 		result = append(result, 255&x)
 		offset += 8
 	}
+	reverseArr(result)
 	return result
+}
+
+func reverseArr(arr []byte) {
+	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
 }
