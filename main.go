@@ -17,7 +17,7 @@ func main() {
 	// fmt.Println(binary.BigEndian.Uint64(b))
 	// b := encoder.WriteVInt(s)
 	// fmt.Println(tools.ReadVint(b, 0))
-	b := tools.UInt64ToByte(1000)
+	b := tools.UInt64ToByte(0)
 	// reverseArr(b)
 	fmt.Println(tools.ToUint64(b), len(b))
 	os.Exit(0)

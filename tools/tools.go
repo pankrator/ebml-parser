@@ -266,6 +266,9 @@ func UInt64ToByte(n uint64) []byte {
 		result = append(result, 255&x)
 		offset += 8
 	}
+	if len(result) == 0 {
+		result = []byte{0}
+	}
 	reverseArr(result)
 	return result
 }
