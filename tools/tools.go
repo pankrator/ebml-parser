@@ -11,7 +11,7 @@ import (
 type State string
 
 const (
-	queueSize       = 100
+	queueSize       = 1024
 	waitTimeForData = time.Second
 )
 
@@ -25,6 +25,7 @@ type Result struct {
 	Element  *ElementData
 	DataSize int64
 	Data     []byte
+	Err      error
 }
 
 // TODO: Accept channel to close/stop the parsing
@@ -49,6 +50,9 @@ func Parse(r io.Reader) chan Result {
 					continue
 				} else if err != nil {
 					// TODO: Send the error on the channel
+					results <- Result{
+						Err: fmt.Errorf("could not read tag ID: %s", err),
+					}
 					return
 				}
 				tagBytes, err := bfr.Peek(length)
@@ -56,9 +60,18 @@ func Parse(r io.Reader) chan Result {
 					time.Sleep(waitTimeForData)
 					continue
 				} else if err != nil {
+					results <- Result{
+						Err: fmt.Errorf("could not read tag ID: %s", err),
+					}
 					return
 				}
-				bfr.Discard(length)
+				discarded, err := bfr.Discard(length)
+				if discarded < length {
+					results <- Result{
+						Err: fmt.Errorf("discarded only %d of %d bytes: %s", discarded, length, err),
+					}
+					return
+				}
 				idHex := ReadTagHex(tagBytes, 0, int64(length))
 
 				state = DATA_SIZE
@@ -76,14 +89,16 @@ func Parse(r io.Reader) chan Result {
 				} else if err != nil {
 					return
 				}
-				bfr.Discard(length)
+				discarded, err := bfr.Discard(length)
+				if discarded < length {
+					results <- Result{
+						Err: fmt.Errorf("discarded only %d of %d bytes: %s", discarded, length, err),
+					}
+					return
+				}
 				dataSize = int64(size)
 				tag.DataSize = dataSize
 				state = DATA
-				// if !found && dataSize != 0b0000000011111111111111111111111111111111111111111111111111111111 {
-				// 	state = ID
-				// 	bfr.Discard(int(dataSize))
-				// }
 
 			case DATA:
 				if found {
@@ -117,7 +132,10 @@ func Parse(r io.Reader) chan Result {
 							n, err = io.ReadFull(bfr, contentBytes[read:])
 						}
 						if err != nil {
-							panic(err)
+							results <- Result{
+								Err: fmt.Errorf("unexpected error :%s", err),
+							}
+							return
 						}
 
 						tag.Data = contentBytes
