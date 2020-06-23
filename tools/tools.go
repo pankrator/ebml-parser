@@ -253,3 +253,18 @@ func ToInt64(bytes []byte) int64 {
 	}
 	return result
 }
+
+func UInt64ToByte(n uint64) []byte {
+	result := make([]byte, 0)
+	offset := 0
+	// i := 0
+	for {
+		x := byte(n >> offset)
+		if x == 0 {
+			break
+		}
+		result = append(result, 255&x)
+		offset += 8
+	}
+	return result
+}
