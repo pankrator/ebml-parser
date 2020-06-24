@@ -103,24 +103,13 @@ func Parse(r io.Reader) chan Result {
 			case DATA:
 				if found {
 					switch el.Typ {
-					case String:
-						result := make([]byte, dataSize)
-						var offset int64 = 0
-						for offset < dataSize {
-							n, _ := bfr.Read(result[offset:])
-							offset += int64(n)
-						}
-
-						tag.Data = result
-						state = ID
 					case Master:
 						tag.Element = el
 						state = ID
+					case String:
+						fallthrough
 					case UInteger:
-						bytes := make([]byte, dataSize)
-						bfr.Read(bytes)
-						tag.Data = bytes
-						state = ID
+						fallthrough
 					case Binary:
 						var read int = 0
 						var n int
@@ -145,9 +134,13 @@ func Parse(r io.Reader) chan Result {
 				} else {
 					var read int64 = 0
 					for read < dataSize {
-						if _, err := bfr.ReadByte(); err == nil {
-							read++
+						if _, err := bfr.ReadByte(); err != nil {
+							results <- Result{
+								Err: fmt.Errorf("unexpected error: %s", err),
+							}
+							return
 						}
+						read++
 					}
 					state = ID
 				}
