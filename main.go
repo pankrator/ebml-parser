@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -25,7 +26,8 @@ func main() {
 	reader := open("sample.webm")
 
 	parser := tools.Parser{}
-	elPipe := parser.Parse(reader)
+	ctx := context.Background()
+	elPipe := parser.Parse(ctx, reader)
 	for el := range elPipe {
 		fmt.Printf("%s[%s][%s]=%d\n", el.Element.Name, el.Element.Hex, string(el.Element.Typ), el.DataSize)
 		if el.Element.Name == "Timestamp" {

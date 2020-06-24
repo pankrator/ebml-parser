@@ -2,6 +2,7 @@ package tools
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"math"
@@ -28,8 +29,7 @@ type Result struct {
 	Err      error
 }
 
-// TODO: Accept channel to close/stop the parsing
-func Parse(r io.Reader) chan Result {
+func Parse(ctx context.Context, r io.Reader) chan Result {
 	results := make(chan Result, queueSize)
 
 	go func() {
@@ -40,6 +40,12 @@ func Parse(r io.Reader) chan Result {
 		var found bool
 		var tag Result
 		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
 			switch state {
 			case ID:
 				tag = Result{}
