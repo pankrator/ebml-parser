@@ -39,6 +39,9 @@ func Parse(ctx context.Context, r io.Reader) chan Result {
 		var el *ElementData
 		var found bool
 		var tag Result
+
+		defer close(results)
+
 		for {
 			select {
 			case <-ctx.Done():
